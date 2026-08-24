@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive image tag from ref
+        id: tag
+        run: |
+          set -euo pipefail
+          # v1.2.3 → 1.2.3
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          # semantic major (1.2.3 → 1) for a moving major tag
+          echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker Hub login
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DOCKER_HUB_USERNAME:-}" ] || [ -z "${DOCKER_HUB_TOKEN:-}" ]; then
+            echo "::error::Missing DOCKER_HUB_USERNAME or DOCKER_HUB_TOKEN. Configure both in repo secrets (Settings → Secrets → Actions)."
+            exit 1
+          fi
+          echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            prestaflow/pipe-push:${{ steps.tag.outputs.version }}
+            prestaflow/pipe-push:${{ steps.tag.outputs.major }}
+            prestaflow/pipe-push:latest
+
+      - name: Note next steps
+        run: |
+          echo "::notice::Image pushed as prestaflow/pipe-push:${{ steps.tag.outputs.version }} (+ major/latest). Consumers can now reference 'pipe: docker://prestaflow/pipe-push:${{ steps.tag.outputs.version }}' in bitbucket-pipelines.yml."
