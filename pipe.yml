@@ -1,0 +1,43 @@
+name: PrestaFlow
+description: Run PrestaFlow tests in Bitbucket Pipelines — optional PrestaShop setup via Flashlight, upload results, comment PRs.
+image: prestaflow/pipe-push:1.0.0
+
+variables:
+  - name: TOKEN
+    description: PrestaFlow API token. Use a masked repository variable such as $PRESTAFLOW_TOKEN.
+  - name: PROJECT_ID
+    description: PrestaFlow project Product Key (e.g. pk_01ABC...). Must match the project the token was issued for.
+    default: ""
+  - name: API_URL
+    description: PrestaFlow API base URL.
+    default: "https://api.prestaflow.io"
+  - name: EXECUTE
+    description: Run `composer run prestaflow:json:file` before upload.
+    default: "true"
+  - name: SUITES
+    description: Comma-separated list of suites to run (e.g. BackOffice,FrontOffice). Empty runs all suites.
+    default: ""
+  - name: FLASHLIGHT
+    description: Start a PrestaShop Flashlight Docker instance for the tests to target. Requires docker service enabled.
+    default: "false"
+  - name: PS_VERSION
+    description: Flashlight image tag (e.g. 9.0.0, 8.1.7, latest). Ignored when FLASHLIGHT is false.
+    default: "latest"
+  - name: FLASHLIGHT_MOUNT
+    description: Where to mount the workspace inside the Flashlight container. One of auto|root|modules|themes.
+    default: "auto"
+  - name: FLASHLIGHT_INIT_SCRIPTS
+    description: Optional path (absolute or relative to the workspace) to a directory of Flashlight init scripts.
+    default: ""
+  - name: PR_COMMENT
+    description: Post/update a summary comment on the pull request. Defaults to true on pull-request builds, false otherwise.
+    default: ""
+  - name: UPLOAD_ARTIFACTS
+    description: Persist results.json + error/visual screenshots into $BITBUCKET_PIPE_SHARED_STORAGE_DIR for downstream steps.
+    default: "true"
+  - name: VISUAL
+    description: Enable visual regression round-trip with the API (download baselines before run, upload actual/diff after).
+    default: "true"
+  - name: BITBUCKET_ACCESS_TOKEN
+    description: Repository access token with `pullrequest:write` used to post PR comments. Optional.
+    default: ""

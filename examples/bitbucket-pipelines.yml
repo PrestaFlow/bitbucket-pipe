@@ -1,0 +1,57 @@
+# Real-world sample bitbucket-pipelines.yml using the PrestaFlow pipe.
+#
+# Required repository variables (Repository settings → Repository variables):
+#   PRESTAFLOW_TOKEN            (Secured)  PrestaFlow API token
+#   PRESTAFLOW_BITBUCKET_TOKEN  (Secured)  Repo Access Token with pullrequest:write  [optional, for PR comments]
+image: php:8.3-cli
+
+definitions:
+  services:
+    docker:
+      memory: 3072
+
+pipelines:
+  pull-requests:
+    '**':
+      - step:
+          name: PrestaFlow — Flashlight + run + upload + PR comment
+          services: [docker]
+          size: 2x
+          artifacts:
+            - prestaflow.env
+            - tests/prestaflow/results.json
+            - tests/prestaflow/screens/**
+          script:
+            - pipe: docker://prestaflow/pipe-push:1.0.0
+              variables:
+                TOKEN: $PRESTAFLOW_TOKEN
+                PROJECT_ID: pk_01ABCDEFGHIJKLMNOPQRSTUV
+                FLASHLIGHT: 'true'
+                PS_VERSION: '9.0.0'
+                FLASHLIGHT_MOUNT: 'auto'
+                SUITES: 'BackOffice,FrontOffice'
+                VISUAL: 'true'
+                BITBUCKET_ACCESS_TOKEN: $PRESTAFLOW_BITBUCKET_TOKEN
+
+      - step:
+          name: Notify (downstream consumer)
+          script:
+            - . prestaflow.env
+            - echo "Report → $PRESTAFLOW_REPORT_URL"
+            - echo "Result: $PRESTAFLOW_STATUS ($PRESTAFLOW_PASSED/$PRESTAFLOW_TOTAL passed)"
+
+  branches:
+    main:
+      - step:
+          name: PrestaFlow — nightly baseline run
+          services: [docker]
+          size: 2x
+          script:
+            - pipe: docker://prestaflow/pipe-push:1.0.0
+              variables:
+                TOKEN: $PRESTAFLOW_TOKEN
+                PROJECT_ID: pk_01ABCDEFGHIJKLMNOPQRSTUV
+                FLASHLIGHT: 'true'
+                PS_VERSION: 'latest'
+                VISUAL: 'true'
+                PR_COMMENT: 'false'
