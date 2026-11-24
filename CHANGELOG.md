@@ -19,7 +19,7 @@ Flashlight fixes of the GitHub Action v2.3.0 to v2.4.1, for `prestaflow/php-libr
 ### Changed
 - `PS_VERSION` reaches the scripts as `PRESTAFLOW_FLASHLIGHT_TAG` (it was `PRESTAFLOW_PS_VERSION`). `PRESTAFLOW_PS_VERSION` in `prestaflow.env` is now the bare version, and is absent when it could not be told. A `PRESTAFLOW_PS_VERSION` passed to the pipe is no longer overwritten by `PS_VERSION`, and wins.
 - A `PRESTAFLOW_*` variable passed to the pipe now reaches the tests with Flashlight, and wins over the generated values.
-- `pipe.yml`, the README and the example reference `prestaflow/pipe-push:0.2.0` (and the floating `:0`). They said `1.0.0`, which never matched a release.
+- **The pipe image is published on GitHub Container Registry**, as `ghcr.io/prestaflow/pipe-push:<version>` (plus `:<major>` and `:latest`), with the release workflow's `GITHUB_TOKEN`. It was meant for Docker Hub (`prestaflow/pipe-push`), where nothing was ever published. Use `pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0`. `pipe.yml`, the README and the example say so (they said `prestaflow/pipe-push:1.0.0`), and the release workflow checks that `pipe.yml` matches the tag.
 
 ## [0.1.0] — 2026-08-24
 

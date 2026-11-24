@@ -17,7 +17,7 @@ pipelines:
           name: PrestaFlow
           services: [docker]
           script:
-            - pipe: docker://prestaflow/pipe-push:0.2.0
+            - pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0
               variables:
                 TOKEN: $PRESTAFLOW_TOKEN
                 PROJECT_ID: pk_01ABC...
@@ -84,7 +84,7 @@ Consume it in a later step by declaring `artifacts: [prestaflow.env]` on the pip
     services: [docker]
     artifacts: [prestaflow.env]
     script:
-      - pipe: docker://prestaflow/pipe-push:0.2.0
+      - pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0
         variables:
           TOKEN: $PRESTAFLOW_TOKEN
           PROJECT_ID: pk_01ABC...
@@ -130,7 +130,7 @@ Those keys are removed from composer's environment so the library reads them fro
 A pipe only receives the variables listed under its `variables:`, so pass library settings there:
 
 ```yaml
-- pipe: docker://prestaflow/pipe-push:0.2.0
+- pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0
   variables:
     TOKEN: $PRESTAFLOW_TOKEN
     FLASHLIGHT: 'true'
@@ -159,13 +159,7 @@ The container's entrypoint runs these scripts in order — each is a small self�
 
 ## Publishing
 
-- **Docker Hub**: the pipe is distributed as `prestaflow/pipe-push:<version>`. Build & push:
-  ```bash
-  docker build -t prestaflow/pipe-push:0.2.0 -t prestaflow/pipe-push:0 -t prestaflow/pipe-push:latest .
-  docker push prestaflow/pipe-push:0.2.0
-  docker push prestaflow/pipe-push:0
-  docker push prestaflow/pipe-push:latest
-  ```
+- **GitHub Container Registry**: the pipe is distributed as `ghcr.io/prestaflow/pipe-push:<version>` (plus the moving `:<major>` and `:latest`). Pushing a `v*` tag runs [`.github/workflows/release.yml`](./.github/workflows/release.yml), which builds the image for amd64 and arm64 and pushes it with the workflow's `GITHUB_TOKEN`: no registry account or secret is needed. Before tagging, set `image:` in `pipe.yml` to the new version (the workflow checks it). After the very first release, make the package public once in its settings on GitHub (Package settings → Change visibility).
 - **Bitbucket Marketplace**: submit this repository at <https://bitbucket.org/product/features/pipelines/integrations>. Marketplace listings point to the same `pipe.yml`/Docker image; there's no separate artifact to publish.
 
 ## License

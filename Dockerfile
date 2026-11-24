@@ -1,5 +1,8 @@
 FROM php:8.3-cli-alpine
 
+# Links the ghcr.io package to this repository.
+LABEL org.opencontainers.image.source="https://github.com/PrestaFlow/bitbucket-pipe"
+
 # System deps: bash for scripts, curl+jq for API calls, git for VCS, docker-cli+compose for Flashlight.
 RUN apk add --no-cache \
       bash \
