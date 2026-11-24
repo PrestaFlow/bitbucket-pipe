@@ -5,6 +5,15 @@ on:
     tags:
       - 'v*'
 
+# The image goes to GitHub Container Registry with the workflow's own
+# GITHUB_TOKEN: no registry account or secret to set up.
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/prestaflow/pipe-push
+
 jobs:
   publish-docker-image:
     runs-on: ubuntu-latest
@@ -21,23 +30,27 @@ jobs:
           # semantic major (1.2.3 → 1) for a moving major tag
           echo "major=${VERSION%%.*}" >> "$GITHUB_OUTPUT"
 
+      - name: Check pipe.yml points at this version
+        run: |
+          set -euo pipefail
+          expected="image: ${IMAGE}:${{ steps.tag.outputs.version }}"
+          if ! grep -qxF "$expected" pipe.yml; then
+            echo "::error::pipe.yml must say '${expected}' for this release."
+            exit 1
+          fi
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Docker Hub login
-        env:
-          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -z "${DOCKER_HUB_USERNAME:-}" ] || [ -z "${DOCKER_HUB_TOKEN:-}" ]; then
-            echo "::error::Missing DOCKER_HUB_USERNAME or DOCKER_HUB_TOKEN. Configure both in repo secrets (Settings → Secrets → Actions)."
-            exit 1
-          fi
-          echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -46,10 +59,10 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            prestaflow/pipe-push:${{ steps.tag.outputs.version }}
-            prestaflow/pipe-push:${{ steps.tag.outputs.major }}
-            prestaflow/pipe-push:latest
+            ${{ env.IMAGE }}:${{ steps.tag.outputs.version }}
+            ${{ env.IMAGE }}:${{ steps.tag.outputs.major }}
+            ${{ env.IMAGE }}:latest
 
       - name: Note next steps
         run: |
-          echo "::notice::Image pushed as prestaflow/pipe-push:${{ steps.tag.outputs.version }} (+ major/latest). Consumers can now reference 'pipe: docker://prestaflow/pipe-push:${{ steps.tag.outputs.version }}' in bitbucket-pipelines.yml."
+          echo "::notice::Image pushed as ${IMAGE}:${{ steps.tag.outputs.version }} (+ major/latest). Consumers reference 'pipe: docker://${IMAGE}:${{ steps.tag.outputs.version }}' in bitbucket-pipelines.yml. On the first release, make the package public (Package settings → Change visibility)."

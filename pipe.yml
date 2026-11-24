@@ -1,6 +1,6 @@
 name: PrestaFlow
 description: Run PrestaFlow tests in Bitbucket Pipelines — optional PrestaShop setup via Flashlight, upload results, comment PRs.
-image: prestaflow/pipe-push:0.2.0
+image: ghcr.io/prestaflow/pipe-push:0.2.0
 
 variables:
   - name: TOKEN
