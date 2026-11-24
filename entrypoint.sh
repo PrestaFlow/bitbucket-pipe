@@ -19,9 +19,12 @@ export PRESTAFLOW_API_URL="${API_URL:-https://api.prestaflow.io}"
 export PRESTAFLOW_EXECUTE="${EXECUTE:-true}"
 export PRESTAFLOW_SUITES="${SUITES:-}"
 export PRESTAFLOW_FLASHLIGHT="${FLASHLIGHT:-false}"
-export PRESTAFLOW_PS_VERSION="${PS_VERSION:-latest}"
+# The Flashlight image tag, not the version given to the tests: flashlight.sh
+# derives PRESTAFLOW_PS_VERSION from it and writes it to .env.local.
+export PRESTAFLOW_FLASHLIGHT_TAG="${PS_VERSION:-latest}"
 export PRESTAFLOW_FLASHLIGHT_MOUNT="${FLASHLIGHT_MOUNT:-auto}"
 export PRESTAFLOW_FLASHLIGHT_INIT_SCRIPTS="${FLASHLIGHT_INIT_SCRIPTS:-}"
+export PRESTAFLOW_FLASHLIGHT_INSTALL_MODULE="${FLASHLIGHT_INSTALL_MODULE:-true}"
 export PRESTAFLOW_PR_COMMENT="${PR_COMMENT:-}"
 export PRESTAFLOW_UPLOAD_ARTIFACTS="${UPLOAD_ARTIFACTS:-true}"
 export PRESTAFLOW_VISUAL="${VISUAL:-true}"
@@ -38,6 +41,10 @@ fi
 : > "$WORKSPACE/prestaflow.env"
 
 echo "prestaflow: workspace=$WORKSPACE api=$PRESTAFLOW_API_URL"
+
+# Put the repository's .env.local back (or remove the one Flashlight
+# generated), whatever the outcome of the scripts below.
+trap 'bash /opt/pipe/scripts/flashlight-restore.sh' EXIT
 
 bash /opt/pipe/scripts/flashlight.sh
 bash /opt/pipe/scripts/visual-download.sh

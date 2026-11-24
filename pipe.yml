@@ -1,6 +1,6 @@
 name: PrestaFlow
 description: Run PrestaFlow tests in Bitbucket Pipelines — optional PrestaShop setup via Flashlight, upload results, comment PRs.
-image: prestaflow/pipe-push:1.0.0
+image: prestaflow/pipe-push:0.2.0
 
 variables:
   - name: TOKEN
@@ -21,7 +21,7 @@ variables:
     description: Start a PrestaShop Flashlight Docker instance for the tests to target. Requires docker service enabled.
     default: "false"
   - name: PS_VERSION
-    description: Flashlight image tag (e.g. 9.0.0, 8.1.7, latest). Ignored when FLASHLIGHT is false.
+    description: Flashlight image tag (e.g. 9.0.0, 8.2.8-nginx, latest). The PrestaShop version given to the tests (PRESTAFLOW_PS_VERSION) is read from it, or from the image for a tag without a version. Ignored when FLASHLIGHT is false.
     default: "latest"
   - name: FLASHLIGHT_MOUNT
     description: Where to mount the workspace inside the Flashlight container. One of auto|root|modules|themes.
@@ -29,6 +29,9 @@ variables:
   - name: FLASHLIGHT_INIT_SCRIPTS
     description: Optional path (absolute or relative to the workspace) to a directory of Flashlight init scripts.
     default: ""
+  - name: FLASHLIGHT_INSTALL_MODULE
+    description: When composer.json is a prestashop-module, run `php bin/console prestashop:module install <name>` in Flashlight once the shop is ready. A failed install only warns. Set to 'false' to skip.
+    default: "true"
   - name: PR_COMMENT
     description: Post/update a summary comment on the pull request. Defaults to true on pull-request builds, false otherwise.
     default: ""

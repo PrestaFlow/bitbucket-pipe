@@ -22,7 +22,7 @@ pipelines:
             - tests/prestaflow/results.json
             - tests/prestaflow/screens/**
           script:
-            - pipe: docker://prestaflow/pipe-push:1.0.0
+            - pipe: docker://prestaflow/pipe-push:0.2.0
               variables:
                 TOKEN: $PRESTAFLOW_TOKEN
                 PROJECT_ID: pk_01ABCDEFGHIJKLMNOPQRSTUV
@@ -47,7 +47,7 @@ pipelines:
           services: [docker]
           size: 2x
           script:
-            - pipe: docker://prestaflow/pipe-push:1.0.0
+            - pipe: docker://prestaflow/pipe-push:0.2.0
               variables:
                 TOKEN: $PRESTAFLOW_TOKEN
                 PROJECT_ID: pk_01ABCDEFGHIJKLMNOPQRSTUV

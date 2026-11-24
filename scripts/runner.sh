@@ -30,8 +30,19 @@ fi
 
 echo "runner: composer run prestaflow:json:file (suites=${SUITES:-<all>})"
 
+# With Flashlight, flashlight.sh merged the PRESTAFLOW_* pipe variables into
+# .env.local. They are removed from composer's environment, or phpdotenv
+# (immutable) would skip the file's value for them (src/runner in the Action).
+STRIP=()
+KEYS_FILE="$PWD/.prestaflow-flashlight/dotenv-keys"
+if [ -f "$KEYS_FILE" ]; then
+  while IFS= read -r key; do
+    if [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then STRIP+=(-u "$key"); fi
+  done < "$KEYS_FILE"
+fi
+
 set +e
-composer run prestaflow:json:file
+env ${STRIP[@]+"${STRIP[@]}"} composer run prestaflow:json:file
 RC=$?
 set -e
 
