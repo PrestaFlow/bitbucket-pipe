@@ -17,7 +17,7 @@ pipelines:
           name: PrestaFlow
           services: [docker]
           script:
-            - pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0
+            - pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.1
               variables:
                 TOKEN: $PRESTAFLOW_TOKEN
                 PROJECT_ID: pk_01ABC...
@@ -84,7 +84,7 @@ Consume it in a later step by declaring `artifacts: [prestaflow.env]` on the pip
     services: [docker]
     artifacts: [prestaflow.env]
     script:
-      - pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0
+      - pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.1
         variables:
           TOKEN: $PRESTAFLOW_TOKEN
           PROJECT_ID: pk_01ABC...
@@ -130,7 +130,7 @@ Those keys are removed from composer's environment so the library reads them fro
 A pipe only receives the variables listed under its `variables:`, so pass library settings there:
 
 ```yaml
-- pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.0
+- pipe: docker://ghcr.io/prestaflow/pipe-push:0.2.1
   variables:
     TOKEN: $PRESTAFLOW_TOKEN
     FLASHLIGHT: 'true'
